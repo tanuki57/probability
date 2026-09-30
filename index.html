@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>超低確率ガチャ</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  margin:0;
+  background:linear-gradient(180deg,#111827,#030712);
+  color:white;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+button{
+  font:inherit;
+}
+
+.app{
+  max-width:650px;
+  margin:auto;
+  padding:16px 14px 40px;
+}
+
+h1{
+  text-align:center;
+  margin:8px 0 4px;
+  font-size:28px;
+}
+
+.subtitle{
+  text-align:center;
+  color:#9ca3af;
+  font-size:13px;
+  margin-bottom:16px;
+}
+
+.card{
+  background:rgba(17,24,39,.95);
+  border:1px solid #374151;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+}
+
+.coinbox{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#1f2937;
+  border-radius:14px;
+  padding:14px 16px;
+  margin-bottom:12px;
+}
+
+.coin{
+  font-size:25px;
+  font-weight:800;
+  color:#fbbf24;
+}
+
+.small{
+  font-size:12px;
+  color:#9ca3af;
+}
+
+.progress{
+  height:8px;
+  background:#374151;
+  border-radius:99px;
+  overflow:hidden;
+  margin-top:8px;
+}
+
+.progress > div{
+  height:100%;
+  background:linear-gradient(90deg,#f59e0b,#facc15);
+  width:0%;
+  transition:.25s;
+}
+
+.result{
+  min-height:190px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border-radius:18px;
+  background:radial-gradient(circle at center,#263449,#111827 65%);
+  border:1px solid #374151;
+  margin-bottom:14px;
+  padding:20px;
+}
+
+.result .emoji{
+  font-size:60px;
+}
+
+.result .name{
+  font-size:25px;
+  font-weight:900;
+  margin-top:8px;
+}
+
+.result .rate{
+  font-size:14px;
+  color:#d1d5db;
+  margin-top:5px;
+}
+
+.result.empty{
+  color:#6b7280;
+  font-size:15px;
+}
+
+.result.rare{
+  animation:flash .7s ease;
+}
+
+@keyframes flash{
+  0%{
+    transform:scale(.96);
+    filter:brightness(1);
+  }
+
+  45%{
+    transform:scale(1.03);
+    filter:brightness(1.8);
+  }
+
+  100%{
+    transform:scale(1);
+    filter:brightness(1);
+  }
+}
+
+.buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+button{
+  border:0;
+  border-radius:14px;
+  padding:15px 10px;
+  color:white;
+  background:#374151;
+  font-weight:800;
+  cursor:pointer;
+  transition:.12s;
+}
+
+button:active{
+  transform:scale(.97);
+}
+
+button.primary{
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+  font-size:18px;
+}
+
+button.ten{
+  background:linear-gradient(135deg,#059669,#0d9488);
+}
+
+button.thirty{
+  background:linear-gradient(135deg,#d97706,#dc2626);
+}
+
+button:disabled{
+  opacity:.35;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.unlock{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#111827;
+  border:1px solid #374151;
+  color:#d1d5db;
+  font-size:13px;
+}
+
+.section-title{
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:12px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.stat{
+  background:#111827;
+  border:1px solid #374151;
+  border-radius:12px;
+  padding:11px;
+}
+
+.stat .label{
+  font-size:12px;
+  color:#9ca3af;
+}
+
+.stat .value{
+  font-size:19px;
+  font-weight:800;
+  margin-top:4px;
+}
+
+.rarity{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:11px 0;
+  border-bottom:1px solid #273244;
+}
+
+.rarity:last-child{
+  border-bottom:0;
+}
+
+.left{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.dot{
+  width:11px;
+  height:11px;
+  border-radius:50%;
+}
+
+.r100 .dot{
+  background:#60a5fa;
+}
+
+.r1k .dot{
+  background:#34d399;
+}
+
+.r10k .dot{
+  background:#facc15;
+}
+
+.r100k .dot{
+  background:#fb923c;
+}
+
+.r1m .dot{
+  background:#f87171;
+}
+
+.r10m .dot{
+  background:#c084fc;
+}
+
+.count{
+  font-weight:900;
+}
+
+.history{
+  max-height:230px;
+  overflow:auto;
+  background:#0b1220;
+  border-radius:12px;
+  padding:8px;
+}
+
+.history-item{
+  display:flex;
+  justify-content:space-between;
+  padding:8px;
+  border-bottom:1px solid #1f2937;
+  font-size:13px;
+}
+
+.history-item:last-child{
+  border-bottom:0;
+}
+
+.muted{
+  color:#6b7280;
+}
+
+.danger{
+  background:#4b1d1d;
+  color:#fecaca;
+  width:100%;
+}
+
+.notice{
+  text-align:center;
+  padding:9px;
+  border-radius:10px;
+  background:#172554;
+  color:#bfdbfe;
+  font-size:12px;
+  margin-top:10px;
+}
+
+@media(max-width:420px){
+
+  h1{
+    font-size:24px;
+  }
+
+  .buttons{
+    grid-template-columns:1fr;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<h1>🎰 超低確率ガチャ</h1>
+
+<div class="subtitle">
+天井なし・超低確率ガチャ
+</div>
+
+
+<!-- コイン情報 -->
+
+<div class="card">
+
+<div class="coinbox">
+
+<div>
+
+<div class="small">
+所持コイン
+</div>
+
+<div class="coin">
+🪙 <span id="coins">0</span>
+</div>
+
+</div>
+
+
+<div style="text-align:right">
+
+<div class="small">
+総ガチャ回数
+</div>
+
+<div style="font-size:22px;font-weight:900" id="total">
+0
+</div>
+
+</div>
+
+</div>
+
+
+<div class="small">
+10連解放まで
+</div>
+
+<div class="progress">
+<div id="progress10"></div>
+</div>
+
+<div class="small" id="unlock10Text">
+あと1000コイン
+</div>
+
+
+<div style="height:10px"></div>
+
+
+<div class="small">
+30連解放まで
+</div>
+
+<div class="progress">
+<div id="progress30"></div>
+</div>
+
+<div class="small" id="unlock30Text">
+あと10000コイン
+</div>
+
+</div>
+
+
+<!-- 結果 -->
+
+<div id="result" class="result empty">
+
+ガチャを引いてみよう！
+
+</div>
+
+
+<!-- ガチャボタン -->
+
+<div class="card">
+
+<div class="buttons">
+
+<button
+class="primary"
+onclick="draw(1)"
+>
+🎲 1回引く
+</button>
+
+
+<button
+id="tenBtn"
+class="ten"
+onclick="draw(10)"
+disabled
+>
+🔟 10連
+</button>
+
+
+<button
+id="thirtyBtn"
+class="thirty"
+onclick="draw(30)"
+disabled
+>
+🔥 30連
+</button>
+
+</div>
+
+
+<div class="unlock" id="unlockMessage">
+
+1000コインで10連、
+10000コインで30連が解放されます。
+
+</div>
+
+</div>
+
+
+<!-- 統計 -->
+
+<div class="card">
+
+<div class="section-title">
+📊 統計データ
+</div>
+
+
+<div class="stats">
+
+<div class="stat">
+
+<div class="label">
+総ガチャ回数
+</div>
+
+<div class="value" id="sTotal">
+0
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div class="label">
+最大連続ハズレ
+</div>
+
+<div class="value" id="sMiss">
+0
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div class="label">
+現在の連続ハズレ
+</div>
+
+<div class="value" id="sCurrentMiss">
+0
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div class="label">
+最高レア
+</div>
+
+<div class="value" id="sBest">
+なし
+</div>
+
+</div>
+
+</div>
+
+
+<div style="height:12px"></div>
+
+
+<div class="rarity r100">
+
+<div class="left">
+
+<span class="dot"></span>
+
+<span>
+1 / 100
+</span>
+
+</div>
+
+<span class="count" id="c100">
+0回
+</span>
+
+</div>
+
+
+<div class="rarity r1k">
+
+<div class="left">
+
+<span class="dot"></span>
+
+<span>
+1 / 1,000
+</span>
+
+</div>
+
+<span class="count" id="c1k">
+0回
+</span>
+
+</div>
+
+
+<div class="rarity r10k">
+
+<div class="left">
+
+<span class="dot"></span>
+
+<span>
+1 / 10,000
+</span>
+
+</div>
+
+<span class="count" id="c10k">
+0回
+</span>
+
+</div>
+
+
+<div class="rarity r100k">
+
+<div class="left">
+
+<span class="dot"></span>
+
+<span>
+1 / 100,000
+</span>
+
+</div>
+
+<span class="count" id="c100k">
+0回
+</span>
+
+</div>
+
+
+<div class="rarity r1m">
+
+<div class="left">
+
+<span class="dot"></span>
+
+<span>
+1 / 1,000,000
+</span>
+
+</div>
+
+<span class="count" id="c1m">
+0回
+</span>
+
+</div>
+
+
+<div class="rarity r10m">
+
+<div class="left">
+
+<span class="dot"></span>
+
+<span>
+1 / 10,000,000
+</span>
+
+</div>
+
+<span class="count" id="c10m">
+0回
+</span>
+
+</div>
+
+</div>
+
+
+<!-- 履歴 -->
+
+<div class="card">
+
+<div class="section-title">
+📜 最近の当たり履歴
+</div>
+
+<div id="history" class="history">
+
+<div
+class="muted"
+style="text-align:center;padding:12px"
+>
+まだ当たりはありません
+</div>
+
+</div>
+
+</div>
+
+
+<!-- データ -->
+
+<div class="card">
+
+<div class="section-title">
+⚙️ データ
+</div>
+
+<button
+class="danger"
+onclick="resetData()"
+>
+データを完全リセット
+</button>
+
+
+<div class="notice">
+
+ガチャ結果・コイン・統計は
+この端末のブラウザに保存されます。
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+const STORAGE_KEY = "ultra_gacha_v2";
+
+
+/* =========================
+   初期データ
+========================= */
+
+const defaultData = {
+
+coins:0,
+
+total:0,
+
+counts:{
+r100:0,
+r1k:0,
+r10k:0,
+r100k:0,
+r1m:0,
+r10m:0
+},
+
+currentMiss:0,
+
+maxMiss:0,
+
+bestRank:null,
+
+history:[]
+
+};
+
+
+let data = loadData();
+
+
+/* =========================
+   データ読み込み
+========================= */
+
+function loadData(){
+
+try{
+
+const saved =
+localStorage.getItem(STORAGE_KEY);
+
+if(!saved){
+
+return structuredClone(defaultData);
+
+}
+
+const parsed =
+JSON.parse(saved);
+
+return {
+
+...structuredClone(defaultData),
+
+...parsed,
+
+counts:{
+...defaultData.counts,
+...(parsed.counts || {})
+},
+
+history:
+Array.isArray(parsed.history)
+? parsed.history
+:[]
+
+};
+
+}catch(e){
+
+return structuredClone(defaultData);
+
+}
+
+}
+
+
+/* =========================
+   保存
+========================= */
+
+function saveData(){
+
+localStorage.setItem(
+STORAGE_KEY,
+JSON.stringify(data)
+);
+
+}
+
+
+/* =========================
+   数字表示
+========================= */
+
+function fmt(n){
+
+return Number(n).toLocaleString("ja-JP");
+
+}
+
+
+/* =========================
+   ガチャ抽選
+=========================
+
+各レアの実際の確率
+
+1/100
+1/1,000
+1/10,000
+1/100,000
+1/1,000,000
+1/10,000,000
+
+合計しても約1.11111%なので、
+残りはハズレ。
+
+========================= */
+
+function lottery(){
+
+const r = Math.random();
+
+
+/* 1 / 100 */
+
+if(r < 0.0100000){
+
+return{
+
+key:"r100",
+
+name:"1/100",
+
+emoji:"💙",
+
+rank:1,
+
+message:"レア当たり！"
+
+};
+
+}
+
+
+/* 1 / 1,000 */
+
+if(r < 0.0110000){
+
+return{
+
+key:"r1k",
+
+name:"1/1,000",
+
+emoji:"💚",
+
+rank:2,
+
+message:"超レア当たり！"
+
+};
+
+}
+
+
+/* 1 / 10,000 */
+
+if(r < 0.0111000){
+
+return{
+
+key:"r10k",
+
+name:"1/10,000",
+
+emoji:"💛",
+
+rank:3,
+
+message:"激レア当たり！！"
+
+};
+
+}
+
+
+/* 1 / 100,000 */
+
+if(r < 0.0111100){
+
+return{
+
+key:"r100k",
+
+name:"1/100,000",
+
+emoji:"🧡",
+
+rank:4,
+
+message:"超激レア当たり！！！"
+
+};
+
+}
+
+
+/* 1 / 1,000,000 */
+
+if(r < 0.0111110){
+
+return{
+
+key:"r1m",
+
+name:"1/1,000,000",
+
+emoji:"❤️",
+
+rank:5,
+
+message:"奇跡の当たり！！！！"
+
+};
+
+}
+
+
+/* 1 / 10,000,000 */
+
+if(r < 0.0111111){
+
+return{
+
+key:"r10m",
+
+name:"1/10,000,000",
+
+emoji:"💜",
+
+rank:6,
+
+message:"伝説の大当たり！！！！！！"
+
+};
+
+}
+
+
+/* ハズレ */
+
+return null;
+
+}
+
+
+/* =========================
+   ガチャを引く
+========================= */
+
+function draw(times){
+
+/* 10連 */
+
+if(
+times === 10 &&
+data.coins < 1000
+){
+
+return;
+
+}
+
+
+/* 30連 */
+
+if(
+times === 30 &&
+data.coins < 10000
+){
+
+return;
+
+}
+
+
+let results = [];
+
+
+for(
+let i=0;
+i<times;
+i++
+){
+
+const result =
+lottery();
+
+
+/* 1回引くごとに
+   1コイン */
+
+data.total++;
+
+data.coins++;
+
+
+if(result){
+
+/* 当たり回数 */
+
+data.counts[result.key]++;
+
+
+/* 連続ハズレリセット */
+
+data.currentMiss = 0;
+
+
+/* 最高レア更新 */
+
+if(
+data.bestRank === null ||
+result.rank > data.bestRank
+){
+
+data.bestRank =
+result.rank;
+
+}
+
+
+/* 履歴 */
+
+data.history.unshift({
+
+name:result.name,
+
+message:result.message,
+
+total:data.total,
+
+time:
+new Date()
+.toLocaleString("ja-JP")
+
+});
+
+
+/* 履歴は最大50件 */
+
+data.history =
+data.history.slice(0,50);
+
+
+results.push(result);
+
+}else{
+
+/* ハズレ */
+
+data.currentMiss++;
+
+
+if(
+data.currentMiss >
+data.maxMiss
+){
+
+data.maxMiss =
+data.currentMiss;
+
+}
+
+}
+
+}
+
+
+saveData();
+
+
+/* 最新結果 */
+
+const latest =
+results.length
+? results[results.length-1]
+:null;
+
+
+showResult(
+latest,
+times,
+results
+);
+
+
+updateUI();
+
+}
+
+
+/* =========================
+   結果表示
+========================= */
+
+function showResult(
+result,
+times,
+results
+){
+
+const box =
+document.getElementById("result");
+
+
+/* ハズレ */
+
+if(!result){
+
+box.className =
+"result";
+
+box.innerHTML = `
+
+<div>
+
+<div class="emoji">
+😢
+</div>
+
+<div class="name">
+ハズレ
+</div>
+
+<div class="rate">
+${times}回引いて当たりなし
+</div>
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+/* 当たり */
+
+box.className =
+"result rare";
+
+
+box.innerHTML = `
+
+<div>
+
+<div class="emoji">
+${result.emoji}
+</div>
+
+<div class="name">
+${result.message}
+</div>
+
+<div class="rate">
+
+${result.name}
+
+<br>
+
+${times === 1
+? "1回"
+: `${results.length}個の当たり`}
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* =========================
+   画面更新
+========================= */
+
+function updateUI(){
+
+/* コイン */
+
+document.getElementById("coins")
+.textContent =
+fmt(data.coins);
+
+
+/* 総回数 */
+
+document.getElementById("total")
+.textContent =
+fmt(data.total);
+
+
+/* 統計 */
+
+document.getElementById("sTotal")
+.textContent =
+fmt(data.total);
+
+
+document.getElementById("sMiss")
+.textContent =
+fmt(data.maxMiss);
+
+
+document.getElementById("sCurrentMiss")
+.textContent =
+fmt(data.currentMiss);
+
+
+/* 最高レア */
+
+const bestNames = {
+
+1:"1/100",
+
+2:"1/1,000",
+
+3:"1/10,000",
+
+4:"1/100,000",
+
+5:"1/1,000,000",
+
+6:"1/10,000,000"
+
+};
+
+
+document.getElementById("sBest")
+.textContent =
+data.bestRank
+? bestNames[data.bestRank]
+:"なし";
+
+
+/* 各当たり */
+
+document.getElementById("c100")
+.textContent =
+fmt(data.counts.r100)+"回";
+
+
+document.getElementById("c1k")
+.textContent =
+fmt(data.counts.r1k)+"回";
+
+
+document.getElementById("c10k")
+.textContent =
+fmt(data.counts.r10k)+"回";
+
+
+document.getElementById("c100k")
+.textContent =
+fmt(data.counts.r100k)+"回";
+
+
+document.getElementById("c1m")
+.textContent =
+fmt(data.counts.r1m)+"回";
+
+
+document.getElementById("c10m")
+.textContent =
+fmt(data.counts.r10m)+"回";
+
+
+/* 10連進行度 */
+
+const p10 =
+Math.min(
+data.coins / 1000 * 100,
+100
+);
+
+
+/* 30連進行度 */
+
+const p30 =
+Math.min(
+data.coins / 10000 * 100,
+100
+);
+
+
+document.getElementById(
+"progress10"
+).style.width =
+p10+"%";
+
+
+document.getElementById(
+"progress30"
+).style.width =
+p30+"%";
+
+
+/* 解放表示 */
+
+document.getElementById(
+"unlock10Text"
+).textContent =
+
+data.coins >= 1000
+
+? "🔓 10連解放済み"
+
+: `あと${fmt(1000-data.coins)}コイン`;
+
+
+document.getElementById(
+"unlock30Text"
+).textContent =
+
+data.coins >= 10000
+
+? "🔓 30連解放済み"
+
+: `あと${fmt(10000-data.coins)}コイン`;
+
+
+/* ボタン */
+
+const ten =
+document.getElementById("tenBtn");
+
+const thirty =
+document.getElementById("thirtyBtn");
+
+
+ten.disabled =
+data.coins < 1000;
+
+
+thirty.disabled =
+data.coins < 10000;
+
+
+/* メッセージ */
+
+if(data.coins >= 10000){
+
+document.getElementById(
+"unlockMessage"
+).textContent =
+"🔓 10連・30連がどちらも解放されています！";
+
+}
+
+else if(data.coins >= 1000){
+
+document.getElementById(
+"unlockMessage"
+).textContent =
+`🔓 10連解放済み！30連まであと${fmt(10000-data.coins)}コイン`;
+
+}
+
+else{
+
+document.getElementById(
+"unlockMessage"
+).textContent =
+`10連まであと${fmt(1000-data.coins)}コイン`;
+
+}
+
+
+/* 履歴 */
+
+renderHistory();
+
+}
+
+
+/* =========================
+   履歴表示
+========================= */
+
+function renderHistory(){
+
+const el =
+document.getElementById("history");
+
+
+if(!data.history.length){
+
+el.innerHTML = `
+
+<div
+class="muted"
+style="text-align:center;padding:12px"
+>
+
+まだ当たりはありません
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+el.innerHTML =
+data.history
+.map(h => `
+
+<div class="history-item">
+
+<span>
+
+${h.message}
+
+<strong>
+${h.name}
+</strong>
+
+</span>
+
+<span class="muted">
+
+#${fmt(h.total)}
+
+</span>
+
+</div>
+
+`)
+.join("");
+
+}
+
+
+/* =========================
+   リセット
+========================= */
+
+function resetData(){
+
+const ok =
+confirm(
+
+"本当にすべてのデータを消しますか？\n\n"+
+"コイン・ガチャ回数・当たり回数・履歴が"+
+"すべてリセットされます。"
+
+);
+
+
+if(!ok){
+
+return;
+
+}
+
+
+data =
+structuredClone(defaultData);
+
+
+saveData();
+
+
+const box =
+document.getElementById("result");
+
+
+box.className =
+"result empty";
+
+
+box.textContent =
+"ガチャを引いてみよう！";
+
+
+updateUI();
+
+}
+
+
+/* =========================
+   起動時
+========================= */
+
+updateUI();
+
+</script>
+
+</body>
+</html>
